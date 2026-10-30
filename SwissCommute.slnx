@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SwissCommute.Api/SwissCommute.Api.csproj" />
+    <Project Path="src/SwissCommute.Core/SwissCommute.Core.csproj" />
+    <Project Path="src/SwissCommute.Infrastructure/SwissCommute.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SwissCommute.Tests/SwissCommute.Tests.csproj" />
+  </Folder>
+</Solution>
