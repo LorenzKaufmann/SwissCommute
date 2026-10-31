@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/decision.md" />
+    <File Path="docs/learning-log.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/SwissCommute.Api/SwissCommute.Api.csproj" />
     <Project Path="src/SwissCommute.Core/SwissCommute.Core.csproj" />
