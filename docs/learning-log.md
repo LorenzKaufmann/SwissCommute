@@ -92,3 +92,53 @@ Lesson: Encode every value that goes into a URL, not only the ones with umlauts.
 - HTTP & URL encoding: explain percent-encoding, reserved characters (`&`, `=`, `+`) and why every value must be encoded. Status: 🟡
 - Dates & times: explain UTC offset vs time zone, ISO 8601, and why `DateTimeOffset` matters. Status: 🟡
 - API exploration: explain why you explore an API before writing DTOs, and why we store ids. Status: 🟢
+
+## 2026-10-31 – Step 2: DTOs for the transport API
+
+### Questions & my answers
+**Q: What do we build in this step, and why do DTOs live in Infrastructure?**
+My answer: C# types that hold the data from the external API. If the API changes, only Infrastructure changes, not the Core logic – this limits the impact of an API change.
+Assessment: ✅ Correct.
+To add next time: Term "anti-corruption layer"; in English the impact of a change is called its "blast radius".
+
+**Q: Why `record`?**
+My answer: To recognise which files contain DTOs; value equality.
+Assessment: 🟡 Value equality is right; recognising DTOs is not the reason (folder and name do that).
+Correct reasons: immutability (with `init`), value equality, little code.
+
+**Q: Which types for id, delay and times?**
+My answers: `id` as `string?`, `delay` as `int?` (null = no data, 0 = on time), `DateTimeOffset?` for times.
+Assessment: ✅ Types correct; 🟡 reasoning for `string`.
+To add next time:
+- `id` is a string because the JSON sends it in quotes; ids are identifiers, not numbers (like postcodes).
+- Rule of thumb: quotes in JSON → `string`, no quotes → number.
+
+**Q: Attribute per field (A) or JsonSerializerDefaults.Web (B)?**
+My answer: A – nothing happens invisibly, so someone new to the code finds their way.
+Assessment: ✅ Good reasoning. Bonus: C# properties can be renamed without breaking the mapping.
+
+**Q: Why `LocationsResponse` and not `LocationsDto`?** (my own question)
+Answer I got: `…Response` = the envelope a whole endpoint returns; `…Dto` = data objects inside it.
+`ConnectionDto` vs `ConnectionsDto` would differ by a single "s".
+
+### Learned by doing
+- Map JSON systematically, from the outside in: every `{ }` → a record, every `[ ]` → `IReadOnlyList<T>`.
+- DTOs mirror only the JSON. `Route` is our own domain concept and does not belong there.
+- YAGNI: only map what we need. The top-level `stations` is an object, not a list. Mapping it as a list would have crashed.
+- `?` on the list (`IReadOnlyList<string>?`), not on the items, when only the list can be missing.
+- Never return `null` for collections → default to an empty list (`= []`).
+- Record body `{ … }` with fields without a modifier = **private fields**; System.Text.Json ignores them → every value stays null, silently.
+- `[property: …]` is only needed for positional records; on normal properties it is redundant.
+- `{ get; set; }` makes a record mutable; `{ get; init; }` only allows setting during creation.
+- Positional vs nominal records: nominal with `init` is more readable when there are many attributes.
+- File-scoped namespaces; `ImplicitUsings` makes `using System;` etc. unnecessary.
+
+### Open / to practise
+- **A green build does not mean "all good" – read the warnings.** (CS0657 / CS0649 pointed to the private-field bug.)
+- *Departure* vs *destination*: mixed up twice. A checkpoint has arrival/departure; the destination is where a connection ends.
+- Plural of abbreviations without an apostrophe: "dtos", not "dto's".
+
+### Target knowledge level
+- Records & immutability: explain record vs class, `init` vs `set`, positional vs nominal. Status: 🟡
+- JSON mapping: map a JSON structure to C# types and justify nullability. Status: 🟢
+- Compiler warnings: read and understand them, know `TreatWarningsAsErrors`. Status: 🟡
