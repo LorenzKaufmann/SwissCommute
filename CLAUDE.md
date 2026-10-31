@@ -14,6 +14,25 @@ Lorenz must be able to explain every design decision in a job interview. Therefo
 - **Suggest commit messages** (Conventional Commits, English) after each completed step.
 - Communicate with Lorenz in **German**. Code, comments, commit messages and README are in **English**.
 
+## Working mode (pair programming)
+
+Lorenz is the **driver** (writes the code), Claude is the **navigator** (explains and reviews).
+
+For every step:
+1. Claude explains the goal and the approach: no code yet, but alternatives and trade-offs.
+2. Lorenz summarises it in his own words or asks questions.
+3. Lorenz writes the code. When he is stuck, Claude gives hints, not full solutions.
+4. Claude reviews the code like a pull request: what is good, what to change, and why.
+5. Claude asks 2–3 interview-style questions about the step.
+6. Lorenz writes the commit message, adds an entry to `docs/decisions.md` and commits.
+
+Rules:
+- One concept per step.
+- Nothing gets committed that Lorenz cannot explain.
+- Pure boilerplate may be written by Claude on request, in small pieces; Lorenz explains it back before committing.
+- Claude does not commit or push unless Lorenz explicitly asks.
+- No time pressure: understanding beats finishing.
+
 ## What the app does
 
 1. A user registers routes they commute on (e.g. Pfäffikon SZ → Zürich HB, departing 07:12).
@@ -73,19 +92,19 @@ dotnet run --project src/SwissCommute.Api
 dotnet user-secrets set "Telegram:BotToken" "<token>" --project src/SwissCommute.Api
 ```
 
-## Weekend plan / status
+## Roadmap
 
-**Friday (done)**
+**Done**
 - [x] Solution structure (Core / Infrastructure / Api / Tests), project references
 - [x] GitHub repo (public, MIT license)
 
-**Saturday – foundation & logic**
+**Foundation & logic**
 - [ ] Typed client for transport.opendata.ch in Infrastructure (search stations, get connections)
 - [ ] Core domain models (`Connection`, `Route`, `DelayStatus`, ...) and interfaces
 - [ ] Delay detection logic in Core ("is my connection delayed? what's the next alternative?") + unit tests
 - [ ] API endpoints (manage routes, check a route now) with OpenAPI/Swagger
 
-**Sunday – cloud & polish**
+**Cloud & polish**
 - [ ] Telegram notification sender (Infrastructure) + tests
 - [ ] Azure Functions project with Timer trigger that checks routes and sends alerts
 - [ ] GitHub Actions: build + test on every push, deploy to Azure
