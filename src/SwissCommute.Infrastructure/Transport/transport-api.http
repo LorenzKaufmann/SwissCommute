@@ -1,0 +1,14 @@
+@baseUrl = https://transport.opendata.ch/v1
+@zuerich = Pf%C3%A4ffikon%20SZ
+@pfaeffikonSZ = Z%C3%BCrich%20HB
+@time = 2026-10-31T13:08:00+0100
+
+### Search Stations
+
+GET {{baseUrl}}/locations?query={{zuerich}}
+Accept: application/json
+
+### Search Connections
+
+GET {{baseUrl}}/connections?from={{zuerich}}&to={{pfaeffikonSZ}}&time={{time}}
+Accept: application/json
