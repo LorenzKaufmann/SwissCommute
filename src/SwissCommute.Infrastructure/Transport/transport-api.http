@@ -9,7 +9,8 @@ Accept: application/json
 ### Search Connections
 @pfaeffikonSZID = 8503209
 @zuerichHBID = 8503000
-@time = 2026-10-31T13:08:00+0100
+@date = 2026-10-31
+@time = 13:08
 
-GET {{baseUrl}}/connections?from={{zuerichHBID}}&to={{pfaeffikonSZID}}&time={{time}}
+GET {{baseUrl}}/connections?from={{pfaeffikonSZID}}&to={{zuerichHBID}}&date={{date}}&time={{time}}
 Accept: application/json
