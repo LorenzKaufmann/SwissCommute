@@ -32,6 +32,7 @@ Rules:
 - Pure boilerplate may be written by Claude on request, in small pieces; Lorenz explains it back before committing.
 - Claude does not commit or push unless Lorenz explicitly asks.
 - No time pressure: understanding beats finishing.
+- Claude keeps `docs/learning-log.md` up to date after every step: questions, Lorenz's answers, assessment, what was missing, and a target knowledge level per topic (🔴🟡🟢). Open points are asked again in later sessions.
 
 ## What the app does
 
