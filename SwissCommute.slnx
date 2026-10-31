@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/docs/">
-    <File Path="docs/decision.md" />
+    <File Path="docs/decisions.md" />
     <File Path="docs/learning-log.md" />
   </Folder>
   <Folder Name="/src/">
