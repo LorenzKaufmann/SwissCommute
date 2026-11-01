@@ -23,4 +23,14 @@
     <ProjectReference Include="..\..\src\SwissCommute.Infrastructure\SwissCommute.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestDate\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestDate\locations-zuerich-hb.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
