@@ -1,9 +1,9 @@
-@baseUrl = https://transport.opendata.ch/v1
+@baseUrl = https://transport.opendata.ch/v1/
 
 ### Search Stations
 @zuerichHB = Z%C3%BCrich%20HB
 
-GET {{baseUrl}}/locations?query={{zuerichHB}}
+GET {{baseUrl}}locations?query={{zuerichHB}}
 Accept: application/json
 
 ### Search Connections
@@ -12,5 +12,5 @@ Accept: application/json
 @date = 2026-10-31
 @time = 13:08
 
-GET {{baseUrl}}/connections?from={{pfaeffikonSZID}}&to={{zuerichHBID}}&date={{date}}&time={{time}}
+GET {{baseUrl}}connections?from={{pfaeffikonSZID}}&to={{zuerichHBID}}&date={{date}}&time={{time}}
 Accept: application/json
