@@ -24,13 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="TestDate\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="TestDate\locations-zuerich-hb.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <None Update="TestData\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
