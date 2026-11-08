@@ -215,3 +215,87 @@ To add next time:
 - URL resolution: BaseAddress trailing slash and relative URLs. Status: 🟢
 - Async/await basics: Task vs Task<T>, CS1998, passing CancellationToken. Status: 🟡
 - Test design: AAA, DRY vs DAMP, helpers, expected-first. Status: 🟡
+
+## 2026-11-08 – Step 4: GetConnectionsAsync, timestamp converter and time zones
+
+### Warm-up (repetition of open points)
+**Q: Why must every value in a URL be encoded?**
+First answer: Otherwise stations are not found; umlauts become "random values".
+Assessment: 🟡 → after two rounds 🟢
+Final answer: Characters like `&`, `=`, `+`, `#` have special meaning. Without encoding, input changes the
+structure of the request: normal users get wrong results, attackers can inject parameters. Use `Uri.EscapeDataString` for every value.
+
+**Q: Time zone vs UTC offset, and why DateTimeOffset?**
+First answer: Mixed up time zone and offset; DateTimeOffset because it can read "+0100".
+Assessment: 🟡 → after several rounds 🟢
+Final answer: An offset is only the difference to UTC at a moment; it says nothing about a region (+01:00 fits Zurich, Paris, Lagos).
+A time zone (Europe/Zurich) is a region with rules for which offset applies when (DST). DateTimeOffset stores the offset, so the
+instant is unambiguous on every server. `DateTime` with `Local` uses the server's zone – in the cloud usually UTC –
+so a 06:42 notification would only be sent at 07:42 Swiss time (2 hours late in summer), and only in production.
+Note: DateTimeOffset stores an offset, not a time zone. For recurring times ("every day at 07:12") we need TimeZoneInfo.
+
+**Q: Your build is green – is your code fine?**
+Assessment: 🟡 → 🟢
+Final answer: Green build = no compiler errors. Warnings showed my DTOs had fields instead of properties (all values would be null).
+Green tests only prove what they check: my first client test was green with a wrong BaseAddress; only a test on the request URL found it.
+
+### Thinking aloud before coding (new working rule)
+My first attempt for GetConnectionsAsync: input (station ids, time, token), output (list, empty if none),
+edge cases (encoding, server errors), approach (URL, deserialize, return).
+To add next time:
+- CancellationToken is for aborting a running operation (timeout, client disconnects), not for invalid input.
+- `DateTimeOffset` is a value type and can never be null – no null check needed.
+- Server errors are not the client's job to show to users: the client throws, the caller decides (separation of concerns).
+- The URL has no offset: the API assumes Swiss local time → convert before formatting.
+
+### Questions & my answers
+**Q: An external API returns timestamps your deserializer does not understand. What do you do?**
+My answer: Create a class deriving from `JsonConverter<DateTimeOffset>` and adapt `Read`.
+Assessment: 🟡 Right solution, but the path to it is what counts.
+To add next time: Tell it as diagnosis (test + JsonException path) → alternatives (string property, timestamp, options) →
+decision → safeguard (test with recorded response). `Write` is abstract and must be implemented.
+
+**Q: What is TDD, and did it help you?**
+My answer: Write the test first, empty method, test is red, then implement until green.
+Assessment: 🟡 Mechanics right.
+To add next time: Red → Green → **Refactor**. Concrete benefit: the test exposed the `+0100` problem before the code ever ran against the real API.
+Starting red proves the test can fail at all.
+
+**Q: How do you know your tests would actually find bugs?**
+My answer: I break the code on purpose; without the time zone conversion all three theory cases failed.
+Assessment: ✅ Correct, with a real example.
+To add next time: The term is mutation testing (tool: Stryker.NET). Choose inputs where wrong code gives a different result (UTC, not Swiss time).
+
+### Learned by doing
+- TDD cycle: `throw new NotImplementedException()` → red → implement → green.
+- `JsonConverter<T>`: override `Read` (and the abstract `Write`); register via `[JsonConverter(typeof(...))]`.
+  A converter for `DateTimeOffset` also handles `DateTimeOffset?`.
+- `DateTimeOffset.TryParse` is more tolerant than System.Text.Json; use `CultureInfo.InvariantCulture` for parsing too.
+  Rule: data between machines → invariant culture; display for humans → user culture.
+- `TimeZoneInfo.ConvertTime(dateTimeOffset, zone)` always works – the overloads with a source zone exist for `DateTime`, which has no offset.
+- Daylight saving time depends on the date, not on the offset you pass in (my "summer" case first used a November date).
+- Format `HH` (24h) vs `hh` (12h); `TimeSpan` does not support `HH`.
+- xUnit `[Theory]` + `[InlineData]`; attribute arguments must be constants → pass strings and parse.
+- Expected values in tests should be literal; computing them with production code (`Uri.EscapeDataString`) mirrors the implementation.
+- Order asserts so the first failure shows the cause (count before `First()`).
+- `Assert.Equal` on DateTimeOffset compares the instant, not the offset → assert `.Offset` separately if it matters.
+- `IReadOnlyList` (ordered, indexer) vs `IReadOnlyCollection` (count + enumeration).
+- DTO properties stay nullable (external data can be missing); our own method parameters can be non-nullable (we decide).
+- A guard clause that can never fail is misleading dead code.
+- "Make invalid states unrepresentable": let the type guarantee what a check would enforce.
+- `git merge master` into a feature branch vs `git rebase master` (rewrites history, needs force push).
+- The API returns the next connections from the requested time (07:12 → first train 07:19).
+
+### Open / to practise
+- Send the exact error message (code + text) instead of describing it; read it first.
+- If the fix seems to be "convert to DateTime", stop and rethink.
+- Clean up `using`s before committing (still forgotten sometimes).
+- Comments in code in English.
+- Interview answers: tell the story (diagnosis → options → decision → safeguard) and name what you learned.
+
+### Target knowledge level
+- Dates & times: offset vs zone, DateTimeOffset vs DateTime, conversion, DST. Status: 🟢
+- URL encoding & parameter injection. Status: 🟢
+- Custom JSON converters. Status: 🟢
+- TDD & test quality (mutation testing, test data choice, literal expectations). Status: 🟡
+- Thinking aloud before coding (questions, edge cases, approach). Status: 🟡 – keep practising
