@@ -19,12 +19,13 @@ Lorenz must be able to explain every design decision in a job interview. Therefo
 Lorenz is the **driver** (writes the code), Claude is the **navigator** (explains and reviews).
 
 For every step:
-1. Claude explains the goal and the approach: no code yet, but alternatives and trade-offs.
-2. Lorenz summarises it in his own words or asks questions.
-3. Lorenz writes the code. When he is stuck, Claude gives hints, not full solutions.
-4. Claude reviews the code like a pull request: what is good, what to change, and why.
-5. Claude asks 2–3 interview-style questions about the step.
-6. Lorenz writes the commit message, adds an entry to `docs/decisions.md` and commits.
+1. Claude names the goal of the step: what we build, not yet how.
+2. Lorenz thinks aloud first: clarifying questions (input, output, edge cases) and a proposed approach.
+3. Claude answers the questions and complements the approach with alternatives and trade-offs.
+4. Lorenz writes the code. When he is stuck, Claude gives hints, not full solutions.
+5. Claude reviews the code like a pull request: what is good, what to change, and why.
+6. Claude asks 2–3 interview-style questions about the step.
+7. Lorenz writes the commit message, adds an entry to `docs/decisions.md` and commits.
 
 Rules:
 - One concept per step.
@@ -33,6 +34,7 @@ Rules:
 - Claude does not commit or push unless Lorenz explicitly asks.
 - No time pressure: understanding beats finishing.
 - Claude keeps `docs/learning-log.md` up to date after every step: questions, Lorenz's answers, assessment, what was missing, and a target knowledge level per topic (🔴🟡🟢). Open points are asked again in later sessions.
+- From time to time, Claude runs a short coding exercise in interview mode with an intentionally incomplete specification. Lorenz clarifies requirements and edge cases before coding and thinks aloud while solving it.
 
 ## What the app does
 
