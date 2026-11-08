@@ -6,14 +6,21 @@ public sealed record CheckpointDto
 {
     [JsonPropertyName("station")] 
     public StationDto? Station { get; init; }
+
+    [JsonConverter(typeof(TransportDateTimeOffsetConverter))]
     [JsonPropertyName("arrival")] 
     public DateTimeOffset? Arrival { get; init; }
+
+    [JsonConverter(typeof(TransportDateTimeOffsetConverter))]
     [JsonPropertyName("departure")] 
     public DateTimeOffset? Departure { get; init; }
+
     [JsonPropertyName("delay")] 
     public int? Delay { get; init; }
+
     [JsonPropertyName("platform")] 
     public string? Platform { get; init; }
+
     [JsonPropertyName("prognosis")] 
     public PrognosisDto? Prognosis { get; init; }
 }
