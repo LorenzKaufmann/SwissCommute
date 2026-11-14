@@ -85,6 +85,8 @@ Rules:
 - Development laptop has **8 GB RAM**: avoid Docker unless really needed, keep tooling lightweight.
 - **Azure costs must stay ~0 CHF.** Pay-As-You-Go subscription with a 5 CHF budget alert. Use only free-tier-friendly services: Azure Functions (Consumption / Flex Consumption), Storage Account. No SQL Database, Container Instances, VNets, VMs. Region: **Switzerland North**.
 - Before creating any Azure resource, state what it costs.
+- AI is an interface layer only: decisions such as "is this connection delayed?" stay deterministic in Core and are unit-tested.
+- AI API costs must stay minimal: spending limits at every provider; API keys only via user-secrets / Key Vault.
 
 ## Common commands
 
@@ -113,7 +115,18 @@ dotnet user-secrets set "Telegram:BotToken" "<token>" --project src/SwissCommute
 - [ ] GitHub Actions: build + test on every push, deploy to Azure
 - [ ] README: problem, features, architecture diagram (Mermaid), screenshots, setup guide
 
+**AI features (after the Telegram bot) – provider-agnostic ("bring your own model")**
+- [ ] Core interfaces per use case (`IRouteParser`, `ICommuteAssistant`); Core knows no AI provider
+- [ ] First provider adapter in Infrastructure: Claude via the official Anthropic C# SDK
+- [ ] Provider and model selected via configuration (Options pattern); API keys only via user-secrets / Key Vault
+- [ ] Natural-language route registration via structured outputs
+- [ ] Telegram assistant with tool use: the model calls our transport client instead of guessing
+- [ ] Eval suite (example inputs with expected results), runnable against every configured provider/model
+- [ ] Second provider adapter to prove the abstraction (ADR: own adapters vs. Microsoft.Extensions.AI)
+- [ ] Optional: friendlier delay notifications (facts computed in Core, the model only phrases the text)
+
 **Later ideas**
 - Persist routes (Azure Table Storage – cheap)
 - Telegram commands to add routes directly from the chat
 - Delay statistics per route / simple prediction
+- Per-user "bring your own model": users store their own API key (encrypted) and choose a model
