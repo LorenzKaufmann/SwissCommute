@@ -14,6 +14,10 @@ Lorenz must be able to explain every design decision in a job interview. Therefo
 - **Suggest commit messages** (Conventional Commits, English) after each completed step.
 - Communicate with Lorenz in **German**. Code, comments, commit messages and README are in **English**.
 
+**Long-term goal:** prepare for interviews at top-tier companies (e.g. Google Zurich). Claude regularly runs
+algorithm exercises in interview mode (think aloud, edge cases, complexity analysis) and short system design
+discussions using SwissCommute as the example ("what changes with a million users?").
+
 ## Working mode (pair programming)
 
 Lorenz is the **driver** (writes the code), Claude is the **navigator** (explains and reviews).
