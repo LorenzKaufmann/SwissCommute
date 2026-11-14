@@ -12,7 +12,7 @@ public static class DependencyInjection
         services.AddOptions<TransportApiOptions>()
             .Bind(configuration.GetSection(TransportApiOptions.SectionName))
             .ValidateDataAnnotations()
-            .Validate(option => option.BaseUrl.EndsWith('/'), "TransportApi:BaseUrl must end with a slash")
+            .Validate(option => option.BaseUrl?.EndsWith('/') == true, "TransportApi:BaseUrl must end with a slash")
             .ValidateOnStart();
 
         services.AddHttpClient<TransportApiClient>((serviceProvider, client) =>
