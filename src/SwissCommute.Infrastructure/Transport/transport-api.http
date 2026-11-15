@@ -1,0 +1,16 @@
+@baseUrl = https://transport.opendata.ch/v1/
+
+### Search Stations
+@zuerichHB = Z%C3%BCrich%20HB
+
+GET {{baseUrl}}locations?query={{zuerichHB}}
+Accept: application/json
+
+### Search Connections
+@pfaeffikonSZID = 8503209
+@zuerichHBID = 8503000
+@date = 2026-10-31
+@time = 13:08
+
+GET {{baseUrl}}connections?from={{pfaeffikonSZID}}&to={{zuerichHBID}}&date={{date}}&time={{time}}
+Accept: application/json
