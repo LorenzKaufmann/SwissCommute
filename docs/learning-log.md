@@ -299,3 +299,88 @@ To add next time: The term is mutation testing (tool: Stryker.NET). Choose input
 - Custom JSON converters. Status: 🟢
 - TDD & test quality (mutation testing, test data choice, literal expectations). Status: 🟡
 - Thinking aloud before coding (questions, edge cases, approach). Status: 🟡 – keep practising
+
+## 2026-11-14 – Step 5: Options pattern, dependency injection and startup validation
+
+### Warm-up (repetition of open points)
+**Q: What is TDD, and did it help you?**
+Assessment: 🟡 → 🟢 after three rounds.
+Final answer: Red → Green → Refactor: write a failing test, write as little code as possible to make it pass, then clean up.
+In SwissCommute the test for GetConnectionsAsync failed with a JsonException: the API sends `+0100` instead of ISO `+01:00`.
+Without the test against a recorded response this would only have shown up in production.
+
+**Q: An external API returns timestamps your deserializer does not understand. What do you do?**
+Assessment: 🟡 → 🟢 after two rounds.
+Final answer: Diagnosis (test + JsonException path) → alternatives (string property: error-prone; Unix timestamp: missing for the prognosis;
+custom `JsonConverter`) → decision (converter: clean DTOs, one place) → safeguard (ADR + test with a recorded real response). About one minute.
+
+### Concepts I asked to have explained (my own questions)
+- **Dependency injection:** a class receives its dependencies instead of creating them. The constructor honestly shows what it needs.
+  Not to be confused with a service locator (asking a service for dependencies) – an anti-pattern.
+- **DI container:** registers "recipes" at startup and resolves (builds) objects later; also manages their lifetime.
+- **Registering:** adding a recipe, e.g. how to build a `TransportApiClient` including its `HttpClient`.
+- **IHttpClientFactory:** builds HttpClients in the background and manages the handlers (pooling, DNS refresh). We never call it ourselves.
+- `AddInfrastructure` is an extension method on `IServiceCollection` (the container), not on `IHttpClientFactory`.
+
+### Thinking aloud before coding
+First idea: an own `IHttpClientService` that creates HttpClients.
+Assessment: 🔴 Reinventing `IHttpClientFactory`. Right instinct: Program.cs should not know the details → extension method `AddInfrastructure()`.
+Good: name config by purpose (`TransportApi`, not `httpClientConfig`), validate at startup instead of first request.
+
+### Questions & my answers
+**Q: What is dependency injection, and why do you use it?**
+Assessment: 🟡 → 🟢
+Final answer: A class gets its dependencies from outside. Main benefit: testability – the transport client receives an HttpClient,
+in tests one with a fake HttpMessageHandler, no network. Plus loose coupling: implementations can be swapped via interfaces.
+
+**Q: How do you make sure your app never runs with a wrong configuration?**
+Assessment: 🟡 → 🟢
+Final answer: Options class with DataAnnotations (`[Required]`, `[Url]`, `[Range]`), a custom rule (BaseUrl ends with `/`) and
+`ValidateOnStart()` – the app refuses to start and names the wrong value. Tests verify the validation itself.
+Story: a config key named differently from the property → timeout would silently have been 0; validation caught it at startup.
+
+**Q: Your properties are non-nullable. Can they still contain null?**
+Assessment: 🔴 → 🟢
+First answer mixed things up ("string inherits from object, int does not" – int inherits from object too).
+Final answer: Reference types can be null, value types cannot. `string` vs `string?` (C# 8 nullable reference types) is only a compiler check.
+Tools that set values via reflection (configuration binder, JSON deserializer) can still write null. My test with `"BaseUrl": null`
+crashed with a NullReferenceException inside the validation rule → data from outside must be checked despite the annotations.
+
+### Learned by doing
+- Options class: `public const string SectionName`, `init` properties, `string.Empty` instead of a real default (fail fast), no `[Required]` on `int`.
+- `[Required]` cannot detect a missing `int` (it is 0, never null) – `[Range(1, 120)]` catches it.
+- Units belong in names: `TimeoutSeconds`. Config keys must match property names exactly.
+- `AddOptions<T>().Bind(...).ValidateDataAnnotations().Validate(..., message).ValidateOnStart()`.
+- Options are registered as `IOptions<T>`, not `T` – asking for `T` compiles but fails at runtime.
+- The `AddHttpClient<T>((serviceProvider, client) => ...)` lambda runs later, every time an HttpClient is built.
+- Error messages should name the full config path (`TransportApi:BaseUrl ...`).
+- `EndsWith('/')` (char, exact) instead of `EndsWith("/")` (culture-sensitive string comparison).
+- `x?.Method() == true` turns a `bool?` into a `bool`; `cond ? false : x` can always be written shorter.
+- Binding surprises: a key with value `null` sets the property to null; `""` or `"1.5"` for an `int` fails at binding (InvalidOperationException), before validation.
+- Tests: in-memory configuration (`AddInMemoryCollection`), real `ServiceCollection`, `.Value` triggers validation (ValidateOnStart only runs in a real host).
+- `Assert.Throws<T>` + `Assert.Contains` with the exact message part; one cause per test case; group tests by behaviour, not by input.
+- Boundary value analysis: test 0 and 121 for a range of 1–120.
+- Typed clients are registered under their type name: `CreateClient(nameof(TransportApiClient))`.
+- Mutation test: re-inserting the `GetRequiredService<TransportApiOptions>` bug made exactly the happy-path test fail.
+- Reading stack traces from bottom to top.
+
+### Git
+- A branch was created from the feature branch instead of master → `git rebase --onto master feature/transport-client` moved only my two commits.
+- Rebase creates new commits (new hashes) → `push --force-with-lease`.
+- `git add -p` to split changes in one file into two commits; check with `git diff --staged`.
+- Merge methods: merge commit / squash / rebase. Squash for work-in-progress commits, rebase when every commit stands on its own.
+  GitHub remembers the last method and suggests the branch name as message – check both before clicking.
+- Never rewrite master's history once published.
+- `git merge master` into the feature branch so CLAUDE.md changes reach new sessions on that branch.
+
+### Open / to practise
+- Check `git status` (current branch) before `git switch -c`.
+- Check the merge method and the commit message before merging a PR.
+- In interview answers: always end with the lesson ("therefore I …").
+
+### Target knowledge level
+- Dependency injection & DI container: Status 🟢
+- Options pattern & startup validation: Status 🟢
+- Nullable reference types vs reference/value types: Status 🟢
+- Git: rebase --onto, add -p, merge methods: Status 🟡
+- TDD (repetition): Status 🟢
