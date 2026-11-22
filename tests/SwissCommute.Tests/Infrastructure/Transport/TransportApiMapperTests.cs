@@ -6,6 +6,18 @@ namespace SwissCommute.Tests.Infrastructure.Transport;
 
 public sealed class TransportApiMapperTests
 {
+    private static readonly DateTimeOffset FromPlannedDeparture = new(2026, 11, 23, 7, 19, 0, TimeSpan.FromHours(1));
+    private const int FromDelayMinutes = 3;
+    private const string FromPlatform = "3";
+    private const string FromStationId = "8503209";
+    private const string FromStationName = "Pfäffikon SZ";
+
+    private static readonly DateTimeOffset ToPlannedArrival = new(2026, 11, 23, 8, 19, 0, TimeSpan.FromHours(1));
+    private const string ToStationId = "8503000";
+    private const string ToStationName = "Zürich HB";
+    private const string Line = "S5";
+
+
     [Fact]
     public void ToStation_ValidStationDto_ReturnsStation()
     {
@@ -50,5 +62,57 @@ public sealed class TransportApiMapperTests
 
         // Assert
         Assert.Null(station);
+    }
+
+    [Fact]
+    public void ToConnection_ValidDto_ReturnsConnection()
+    {
+        // Arrange
+        ConnectionDto connectionDto = CreateValidConnectionDto();
+
+        // Act
+        Connection? connection = TransportApiMapper.ToConnection(connectionDto);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.Equal(FromStationId, connection.From.Id);
+        Assert.Equal(FromStationName, connection.From.Name);
+        Assert.Equal(TimeSpan.FromMinutes(FromDelayMinutes), connection.Delay);
+        Assert.Equal(FromPlannedDeparture, connection.PlannedDeparture);
+        Assert.Equal(FromPlatform, connection.Platform);
+        Assert.Equal(ToStationId, connection.To.Id);
+        Assert.Equal(ToStationName, connection.To.Name);
+        Assert.Equal(ToPlannedArrival, connection.PlannedArrival);
+        Assert.Equal(Line, connection.Line);
+        Assert.Equal(FromPlannedDeparture + TimeSpan.FromMinutes(FromDelayMinutes), connection.ExpectedDeparture);
+    }
+
+    private static ConnectionDto CreateValidConnectionDto()
+    {
+        StationDto fromStationDto = new()
+        {
+            Id = FromStationId,
+            Name = FromStationName
+        };
+        CheckpointDto fromCheckpointDto = new() 
+        {
+            Delay = FromDelayMinutes,
+            Departure = FromPlannedDeparture,
+            Platform = FromPlatform,
+            Station = fromStationDto
+        };
+
+        StationDto toStationDto = new()
+        {
+            Id = ToStationId,
+            Name = ToStationName
+        };
+        // the destination checkpoint only has arrival data, like in real API responses
+        CheckpointDto toCheckpointDto = new()
+        {
+            Arrival = ToPlannedArrival,
+            Station = toStationDto
+        };
+        return new() { From = fromCheckpointDto, Products = [Line], To = toCheckpointDto };
     }
 }
