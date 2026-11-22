@@ -25,10 +25,10 @@ public sealed class TransportApiMapperTests
         string id = "8503000";
         string name = "Zürich HB";
         StationDto stationDto = new() { Id = id, Name = name };
-        
+
         // Act
         Station? station = TransportApiMapper.ToStation(stationDto);
-        
+
         // Assert
         Assert.NotNull(station);
         Assert.Equal(id, station.Id);
@@ -46,10 +46,10 @@ public sealed class TransportApiMapperTests
     {
         // Arrange
         StationDto stationDto = new() { Id = id, Name = name };
-        
+
         // Act
         Station? station = TransportApiMapper.ToStation(stationDto);
-        
+
         // Assert
         Assert.Null(station);
     }
@@ -125,6 +125,57 @@ public sealed class TransportApiMapperTests
         Assert.Equal(expectedLine, connection.Line);
     }
 
+    [Fact]
+    public void ToConnection_MissingPlatform_ReturnsConnection()
+    {
+        // Arrange
+        ConnectionDto validDto = CreateValidConnectionDto();
+        ConnectionDto connectionDto = validDto with { From = validDto.From! with { Platform = null } };
+
+        // Act
+        Connection? connection = TransportApiMapper.ToConnection(connectionDto);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.Null(connection.Platform);
+    }
+
+    [Fact]
+    public void ToConnection_NullDto_ReturnsNull()
+    {
+        // Arrange + Act
+        Connection? connection = TransportApiMapper.ToConnection(null);
+
+        // Assert
+        Assert.Null(connection);
+    }
+
+    [Theory]
+    [MemberData(nameof(DtosWithMissingRequiredField))]
+    public void ToConnection_MissingRequiredField_ReturnsNull(ConnectionDto invalidDto)
+    {
+        // Arrange + Act
+        Connection? connection = TransportApiMapper.ToConnection(invalidDto);
+
+        // Assert
+        Assert.Null(connection);
+    }
+
+    public static TheoryData<ConnectionDto> DtosWithMissingRequiredField()
+    {
+        ConnectionDto validDto = CreateValidConnectionDto();
+        return
+        [
+            validDto with { From = null }, // missing From
+            validDto with { To = null }, // missing To
+            validDto with { From = validDto.From! with { Departure = null } }, // missing From.Departure
+            validDto with { From = validDto.From! with { Station = null } }, // missing From.Station
+            validDto with { To = validDto.To! with { Arrival = null } }, // missing To.Arrival
+            validDto with { To = validDto.To! with { Station = null } }, // missing To.Station
+            validDto with { To = validDto.To! with { Station = validDto.To.Station! with { Id = null } } } // missing To.Station.Id
+        ];
+    }
+
     private static ConnectionDto CreateValidConnectionDto()
     {
         StationDto fromStationDto = new()
@@ -132,7 +183,7 @@ public sealed class TransportApiMapperTests
             Id = FromStationId,
             Name = FromStationName
         };
-        CheckpointDto fromCheckpointDto = new() 
+        CheckpointDto fromCheckpointDto = new()
         {
             Delay = FromDelayMinutes,
             Departure = FromPlannedDeparture,
