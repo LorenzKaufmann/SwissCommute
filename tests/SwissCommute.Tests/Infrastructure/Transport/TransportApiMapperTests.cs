@@ -87,6 +87,25 @@ public sealed class TransportApiMapperTests
         Assert.Equal(FromPlannedDeparture + TimeSpan.FromMinutes(FromDelayMinutes), connection.ExpectedDeparture);
     }
 
+    [Theory]
+    [InlineData(null, null)]   // no real-time data: must stay null
+    [InlineData(0, 0)]         // on time: must become TimeSpan.Zero, NOT null
+    [InlineData(3, 3)]         // delayed
+    public void ToConnection_DelayInMinutes_MapsToTimeSpan(int? delayMinutes, int? expectedMinutes)
+    {
+        // Arrange
+        ConnectionDto validDto = CreateValidConnectionDto();
+        ConnectionDto connectionDto = validDto with { From = validDto.From! with { Delay = delayMinutes } };
+        TimeSpan? expectedDelay = expectedMinutes.HasValue ? TimeSpan.FromMinutes(expectedMinutes.Value) : null;
+
+        // Act
+        Connection? connection = TransportApiMapper.ToConnection(connectionDto);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.Equal(expectedDelay, connection.Delay);
+    }
+
     private static ConnectionDto CreateValidConnectionDto()
     {
         StationDto fromStationDto = new()
