@@ -85,6 +85,22 @@ public sealed class TransportApiClientTests
         Assert.Equal(expectedUri, fakeMessageHandler.LastRequest!.RequestUri!.AbsoluteUri);
     }
 
+    [Fact]
+    public async Task GetConnectionsAsync_ResponseWithInvalidConnection_SkipsInvalidConnection()
+    {
+        // Arrange
+        string fromStationId = "8503209";
+        string toStationId = "8503000";
+        DateTimeOffset requestedDeparture = new(2026, 11, 23, 7, 19, 0, TimeSpan.FromHours(1));
+        var (apiClient, _) = await CreateClientAsync("connections-with-invalid-entry.json");
+
+        // Act
+        IReadOnlyList<Connection> connections = await apiClient.GetConnectionsAsync(fromStationId, toStationId, requestedDeparture);
+
+        // Assert
+        Assert.Equal(["S1", "S2"], connections.Select(connection => connection.Line));
+    }
+
     private static async Task<(TransportApiClient Client, StubHttpMessageHandler MessageHandler)> CreateClientAsync(string testDataFile)
     {
         string path = Path.Combine(AppContext.BaseDirectory, "TestData", testDataFile);
