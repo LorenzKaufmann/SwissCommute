@@ -106,6 +106,25 @@ public sealed class TransportApiMapperTests
         Assert.Equal(expectedDelay, connection.Delay);
     }
 
+    [Theory]
+    [InlineData(null, null)]
+    [InlineData(new string[0], null)]
+    [InlineData(new[] { "S2" }, "S2")]
+    [InlineData(new[] { "S2", "S8" }, "S2")]
+    public void ToConnection_Products_MapsFirstProductToLine(string[]? products, string? expectedLine)
+    {
+        // Arrange
+        ConnectionDto validDto = CreateValidConnectionDto();
+        ConnectionDto connectionDto = validDto with { Products = products };
+
+        // Act
+        Connection? connection = TransportApiMapper.ToConnection(connectionDto);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.Equal(expectedLine, connection.Line);
+    }
+
     private static ConnectionDto CreateValidConnectionDto()
     {
         StationDto fromStationDto = new()
