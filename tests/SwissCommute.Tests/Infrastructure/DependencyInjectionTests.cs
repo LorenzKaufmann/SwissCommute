@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using SwissCommute.Core.Transport;
 using SwissCommute.Infrastructure;
 using SwissCommute.Infrastructure.Transport;
 
@@ -15,11 +16,12 @@ public sealed class DependencyInjectionTests
         IServiceProvider serviceProvider = BuildContainer("https://transport.opendata.ch/v1/", "30");
 
         // Act
+        ITransportClient transportClient = serviceProvider.GetRequiredService<ITransportClient>();
         IHttpClientFactory httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-        HttpClient httpClient = httpClientFactory.CreateClient(nameof(TransportApiClient));
+        HttpClient httpClient = httpClientFactory.CreateClient(nameof(ITransportClient));
 
         // Assert
-        Assert.NotNull(serviceProvider.GetRequiredService<TransportApiClient>());
+        Assert.IsType<TransportApiClient>(transportClient);
         Assert.Equal("https://transport.opendata.ch/v1/", httpClient.BaseAddress?.ToString());
         Assert.Equal(TimeSpan.FromSeconds(30), httpClient.Timeout);
     }
