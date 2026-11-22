@@ -17,7 +17,6 @@ public sealed class TransportApiMapperTests
     private const string ToStationName = "Zürich HB";
     private const string Line = "S5";
 
-
     [Fact]
     public void ToStation_ValidStationDto_ReturnsStation()
     {
@@ -150,30 +149,46 @@ public sealed class TransportApiMapperTests
         Assert.Null(connection);
     }
 
+    public static TheoryData<string> MissingRequiredFields =>
+    [
+        "From",
+        "To",
+        "From.Departure",
+        "From.Station",
+        "To.Arrival",
+        "To.Station",
+        "To.Station.Id"
+    ];
+
     [Theory]
-    [MemberData(nameof(DtosWithMissingRequiredField))]
-    public void ToConnection_MissingRequiredField_ReturnsNull(ConnectionDto invalidDto)
+    [MemberData(nameof(MissingRequiredFields))]
+    public void ToConnection_MissingRequiredField_ReturnsNull(string missingField)
     {
-        // Arrange + Act
-        Connection? connection = TransportApiMapper.ToConnection(invalidDto);
+        // Arrange
+        ConnectionDto connectionDto = CreateDtoWithMissingField(missingField);
+
+        // Act
+        Connection? connection = TransportApiMapper.ToConnection(connectionDto);
 
         // Assert
         Assert.Null(connection);
     }
 
-    public static TheoryData<ConnectionDto> DtosWithMissingRequiredField()
+    private static ConnectionDto CreateDtoWithMissingField(string missingField)
     {
         ConnectionDto validDto = CreateValidConnectionDto();
-        return
-        [
-            validDto with { From = null }, // missing From
-            validDto with { To = null }, // missing To
-            validDto with { From = validDto.From! with { Departure = null } }, // missing From.Departure
-            validDto with { From = validDto.From! with { Station = null } }, // missing From.Station
-            validDto with { To = validDto.To! with { Arrival = null } }, // missing To.Arrival
-            validDto with { To = validDto.To! with { Station = null } }, // missing To.Station
-            validDto with { To = validDto.To! with { Station = validDto.To.Station! with { Id = null } } } // missing To.Station.Id
-        ];
+
+        return missingField switch
+        {
+            "From" => validDto with { From = null },
+            "To" => validDto with { To = null },
+            "From.Departure" => validDto with { From = validDto.From! with { Departure = null } },
+            "From.Station" => validDto with { From = validDto.From! with { Station = null } },
+            "To.Arrival" => validDto with { To = validDto.To! with { Arrival = null } },
+            "To.Station" => validDto with { To = validDto.To! with { Station = null } },
+            "To.Station.Id" => validDto with { To = validDto.To! with { Station = validDto.To.Station! with { Id = null } } },
+            _ => throw new ArgumentOutOfRangeException(nameof(missingField), missingField, "Unknown test case.")
+        };
     }
 
     private static ConnectionDto CreateValidConnectionDto()

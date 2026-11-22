@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace SwissCommute.Infrastructure.Transport;
 
-public sealed class TransportDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
+internal sealed class TransportDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
 {
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

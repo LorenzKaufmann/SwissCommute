@@ -57,7 +57,7 @@ public sealed class DependencyInjectionTests
         Assert.Throws<InvalidOperationException>(() => serviceProvider.GetRequiredService<IOptions<TransportApiOptions>>().Value);
     }
 
-    private static IServiceProvider BuildContainer(string? baseUrl, string? timeoutSeconds)
+    private static ServiceProvider BuildContainer(string? baseUrl, string? timeoutSeconds)
     {
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()

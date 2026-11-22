@@ -2,7 +2,7 @@
 
 namespace SwissCommute.Infrastructure.Transport;
 
-public sealed class TransportApiOptions
+internal sealed class TransportApiOptions
 {
     public const string SectionName = "TransportApi";
 

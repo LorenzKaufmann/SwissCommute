@@ -3,7 +3,7 @@ using SwissCommute.Infrastructure.Transport.Dtos;
 
 namespace SwissCommute.Infrastructure.Transport;
 
-public static class TransportApiMapper
+internal static class TransportApiMapper
 {
     public static Station? ToStation(StationDto? stationDto)
     {

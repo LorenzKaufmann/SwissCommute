@@ -7,7 +7,7 @@ using System.Net.Http.Json;
 
 namespace SwissCommute.Infrastructure.Transport;
 
-public sealed class TransportApiClient(HttpClient httpClient, ILogger<TransportApiClient> logger) : ITransportClient
+internal sealed class TransportApiClient(HttpClient httpClient, ILogger<TransportApiClient> logger) : ITransportClient
 {
     private static readonly TimeZoneInfo SwissTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Zurich");
 
