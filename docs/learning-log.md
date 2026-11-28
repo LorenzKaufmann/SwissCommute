@@ -384,3 +384,100 @@ crashed with a NullReferenceException inside the validation rule → data from o
 - Nullable reference types vs reference/value types: Status 🟢
 - Git: rebase --onto, add -p, merge methods: Status 🟡
 - TDD (repetition): Status 🟢
+
+
+## 2026-11-15 – Step 6: Pull request for the transport client
+
+### Learned by doing
+- PR description structure: Summary, Changes, Design decisions, Notable findings, How to test, Next steps.
+- "How to test" = instructions for a reviewer: commands plus expected result.
+- Never link to branches that will be deleted (link to master).
+- Markdown pitfalls: a leading tab turns a list into a code block; lines without a blank line or bullet merge into one paragraph.
+- Squash merge for work-in-progress commits; the commit message describes the change, not "merge of branch X".
+- Commit bodies are plain text (no backticks), lines under ~72 characters.
+
+## 2026-11-15 – Algorithm exercise: next departure (interview mode)
+
+### Assessment
+Strong: clarifying questions before coding (sorted? equal time? no departure left? invalid time?), own examples incl. edge cases,
+found five bugs by tracing (wrong boundary check, > instead of >=, index out of range, wrong midpoint, endless loop).
+To practise: complexity order (confused O(n log n) with binary search), empty input as a standard edge case,
+trace values from the current code (not from memory), C# syntax on the whiteboard (.Count vs .Length).
+
+### Learned
+- Lower bound: "first element >= x" – remember the candidate and keep searching left, otherwise go right.
+- mid = low + (high - low) / 2 avoids integer overflow; shrink the range in both branches (mid - 1 / mid + 1).
+- Pure functions: pass the list as a parameter instead of reading a field.
+
+## 2026-11-16 / 11-21 / 11-22 – Repetition rounds
+
+| Topic | Before | After |
+|---|---|---|
+| Complexity order O(1) < O(log n) < O(n) < O(n log n) < O(n²) | 🔴 | 🟢 |
+| Examples for each complexity | – | 🟡 Bubble sort is O(n²); n is the variable input size, a constant length is O(1) |
+| Why binary search is O(log n) (~20 steps for 1 million) | – | 🟢 |
+| Lower bound | 🟡 | 🟢 |
+| TimeSpan (duration) vs DateTimeOffset (point in time) vs TimeOnly (time of day) | 🔴 | 🟢 |
+| Core vs Infrastructure / Dependency Inversion Principle (the D in SOLID) | 🔴 | 🟢 |
+| Positional vs nominal records (constructor enforces all values; `required`) | – | 🟢 |
+| Lifted operators: DateTimeOffset + TimeSpan? → DateTimeOffset? | – | 🟢 |
+| Merge methods: squash for work steps, rebase for clean standalone commits | 🟡 | 🟢 |
+
+## 2026-11-22 – Step 7: Domain models, mapping and the anti-corruption layer
+
+### Questions & my answers
+**Q: What is an anti-corruption layer, and how did you implement it?**
+First answer: confused it with the `internal` visibility.
+Assessment: 🟡 → 🟢 after several rounds.
+Final answer: A translation layer between the external API and Core that protects Core from API changes and quirks.
+DTOs mirror the API, the JSON deserializer (with a custom converter for "+0100") reads into them, the mapper translates
+them into Core's own domain models. `internal` + `InternalsVisibleTo` let the compiler enforce that nobody bypasses it.
+
+**Q: An API returns an incomplete entry in a list. What do you do?**
+Assessment: 🟢
+Final answer: Skip and log instead of an exception (otherwise all valid entries are lost); no default values (they would
+lie); structured logging so it is not silent; tested with the invalid entry in the middle – a mutation test (break instead
+of continue) showed that an invalid entry at the end would not have caught the bug.
+
+**Q: Why are DTOs and the client internal, and how do you test them?**
+Assessment: 🟡 → 🟢
+Final answer: Otherwise the API or the Azure Function could bypass the layer; callers only get `ITransportClient`.
+Tests see internals via `InternalsVisibleTo`.
+
+### Discovered myself
+- The transport API only answers within a timetable window (~10 days back, ~5 months ahead, in UTC); outside → HTTP 400.
+  The error shows the time in UTC, which confirms the API interprets our time as Swiss local time. Tracked as a GitHub issue.
+- Future connections come with `"delay": null` – confirms null = no real-time data.
+
+### Learned by doing
+- Domain models belong to Core; Infrastructure only fills them (otherwise circular dependency).
+- Positional records: the parameters ARE the properties (PascalCase, no redeclaration).
+- Computed property `ExpectedDeparture => PlannedDeparture + Delay` – single source of truth.
+- Don't model states we can't detect yet (cancellation: verify against a real response first).
+- Interface members have no `public`/`async`; `async` is an implementation detail.
+- Mapper as a static class (single responsibility, pure, testable); nullable return instead of the Try pattern;
+  a `Try…` prefix promises `bool` + `out`.
+- `is int minutes ? … : null`, list pattern `is [var line, ..]`, analyzer hints (CA1826) are suggestions to understand, not to obey blindly.
+- C# cannot overload by return type only.
+- `ILogger<T>` (not `ILogger`) – same pattern as `IOptions<T>`; structured logging with placeholders, not interpolation.
+- `AddHttpClient<ITransportClient, TransportApiClient>` registers the HttpClient under the interface name.
+- `AddHttpClient` already registers logging; libraries use logging, the application configures it.
+- Inconsistent accessibility (CS0050/CS0051): public members cannot expose internal types → cascade to internal.
+- An internal test method is silently ignored by xUnit – always check the test count.
+- `[MemberData]` must be public; xUnit1045 (non-serializable data) → select cases by name with a switch expression.
+- Test data: named values shared by helper and asserts; decoys (different values) catch wrong mapping paths;
+  equivalence classes instead of all combinations; `with` for "valid object minus one field".
+- `Assert.Single` returns the element; `Assert.Equal(["S1", "S2"], connections.Select(…))`.
+- Every commit should build and pass (git bisect); `refactor:` when behaviour does not change.
+- Effective accessibility is the narrowest on the way: a public method in an internal class is internal.
+
+### Open / to practise
+- Check `git status` / `git diff --staged` before committing (an unrelated .http change slipped in once).
+- Name things precisely in interviews (`InternalsVisibleTo`, "abgewandelte Kopien" instead of "Mutationen").
+
+### Target knowledge level
+- Anti-corruption layer & domain modelling: 🟢
+- Mapping, nullability and defensive handling of external data: 🟢
+- Logging (structured, ILogger<T>): 🟡
+- xUnit advanced (Theory, MemberData, serialization, discovery): 🟢
+- Visibility (internal, InternalsVisibleTo, accessibility rules): 🟢
