@@ -109,7 +109,8 @@ dotnet user-secrets set "Telegram:BotToken" "<token>" --project src/SwissCommute
 
 **Foundation & logic**
 - [x] Typed client for transport.opendata.ch in Infrastructure (search stations, get connections)
-- [ ] Core domain models (`Connection`, `Route`, `DelayStatus`, ...) and interfaces
+- [x] Core domain models (`Station`, `Connection`) and `ITransportClient` interface, anti-corruption layer in Infrastructure
+- [ ] Delay detection logic in Core (`Route`, `DelayStatus`: "is my connection delayed? what's the next alternative?") + unit tests
 - [ ] Delay detection logic in Core ("is my connection delayed? what's the next alternative?") + unit tests
 - [ ] API endpoints (manage routes, check a route now) with OpenAPI/Swagger
 
