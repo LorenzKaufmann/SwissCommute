@@ -2,7 +2,7 @@
 
 namespace SwissCommute.Infrastructure.Transport.Dtos;
 
-public sealed record PrognosisDto
+internal sealed record PrognosisDto
 {
     [JsonPropertyName("platform")] 
     public string? Platform { get; init; }

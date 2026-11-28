@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using SwissCommute.Core.Transport;
 using SwissCommute.Infrastructure.Transport;
 
 namespace SwissCommute.Infrastructure;
@@ -15,7 +16,7 @@ public static class DependencyInjection
             .Validate(option => option.BaseUrl?.EndsWith('/') == true, "TransportApi:BaseUrl must end with a slash")
             .ValidateOnStart();
 
-        services.AddHttpClient<TransportApiClient>((serviceProvider, client) =>
+        services.AddHttpClient<ITransportClient, TransportApiClient>((serviceProvider, client) =>
         {
             TransportApiOptions transportApiOptions = serviceProvider.GetRequiredService<IOptions<TransportApiOptions>>().Value;
             client.BaseAddress = new Uri(transportApiOptions.BaseUrl);

@@ -2,7 +2,7 @@
 
 namespace SwissCommute.Infrastructure.Transport.Dtos;
 
-public sealed record StationDto
+internal sealed record StationDto
 {
     [JsonPropertyName("id")] 
     public string? Id { get; init; }

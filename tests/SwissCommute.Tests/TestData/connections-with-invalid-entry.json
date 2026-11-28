@@ -1,0 +1,61 @@
+{
+  "connections": [
+    {
+      "from": {
+        "station": {
+          "id": "8503209",
+          "name": "Pf\u00e4ffikon SZ"
+        },
+        "departure": "2026-11-23T06:19:00+0100",
+        "delay": 0,
+        "platform": "3"
+      },
+      "to": {
+        "station": {
+          "id": "8503000",
+          "name": "Z\u00fcrich HB"
+        },
+        "arrival": "2026-11-23T06:53:00+0100"
+      },
+      "products": [ "S1" ]
+    },
+    {
+      "from": {
+        "station": {
+          "id": "8503209",
+          "name": "Pf\u00e4ffikon SZ"
+        },
+        "departure": null,
+        "delay": 0,
+        "platform": "3"
+      },
+      "to": {
+        "station": {
+          "id": "8503000",
+          "name": "Z\u00fcrich HB"
+        },
+        "arrival": "2026-11-23T08:53:00+0100"
+      },
+      "products": [ "S6" ]
+    },
+    {
+      "from": {
+        "station": {
+          "id": "8503209",
+          "name": "Pf\u00e4ffikon SZ"
+        },
+        "departure": "2026-11-23T07:19:00+0100",
+        "delay": 0,
+        "platform": "3"
+      },
+      "to": {
+        "station": {
+          "id": "8503000",
+          "name": "Z\u00fcrich HB"
+        },
+        "arrival": "2026-11-23T07:53:00+0100"
+      },
+      "products": [ "S2" ]
+    }
+  ]
+}
